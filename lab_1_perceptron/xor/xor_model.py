@@ -19,42 +19,44 @@ def sigmoid(x):
 
 class XorModel:
     def __init__(self, input_neurons=2, hidden_neurons=16):
-        self.w1 = tf.Variable(tf.random.uniform([input_neurons, hidden_neurons], -1.0, 1.0), dtype=tf.float32)
-        self.b1 = tf.Variable(tf.zeros([hidden_neurons]), dtype=tf.float32)
-        self.w2 = tf.Variable(tf.random.uniform([hidden_neurons, 1], -1.0, 1.0), dtype=tf.float32)
-        self.b2 = tf.Variable(tf.zeros([1]), dtype=tf.float32)
+        self.hidden_w = tf.Variable(tf.random.uniform([input_neurons, hidden_neurons], -1.0, 1.0), dtype=tf.float32)
+        self.hidden_b = tf.Variable(tf.zeros([hidden_neurons]), dtype=tf.float32)
+        self.output_w = tf.Variable(tf.random.uniform([hidden_neurons, 1], -1.0, 1.0), dtype=tf.float32)
+        self.output_b = tf.Variable(tf.zeros([1]), dtype=tf.float32)
 
-        self.checkpoint = tf.train.Checkpoint(w1=self.w1, b1=self.b1, w2=self.  w2, b2=self.b2)
+        self.checkpoint = tf.train.Checkpoint(w1=self.hidden_w, b1=self.hidden_b, w2=self.output_w, b2=self.output_b)
 
-    def forward_train(self, x):
-        layer1 = relu(tf.matmul(tf.expand_dims(x, 0), self.w1) + self.b1)
-        output = sigmoid(tf.matmul(layer1, self.w2) + self.b2)
+    def fit_forward(self, x):
+        hidden_layer = relu(tf.matmul(tf.expand_dims(x, 0), self.hidden_w) + self.hidden_b)
+        output = sigmoid(tf.matmul(hidden_layer, self.output_w) + self.output_b)
         return output
 
     def forward(self, x):
-        layer1 = relu(tf.matmul(tf.expand_dims(x, 0), self.w1) + self.b1)
-        output = sigmoid(tf.matmul(layer1, self.w2) + self.b2)
+        hidden_layer = relu(tf.matmul(tf.expand_dims(x, 0), self.hidden_w) + self.hidden_b)
+        output = sigmoid(tf.matmul(hidden_layer, self.output_w) + self.output_b)
         return round(output.numpy()[0, 0])
 
     def compute_loss(self, output, y):
         return tf.reduce_mean(tf.square(output - y))
 
-    def train(self, train_data, train_answers, epochs=1000, learning_rate=0.05):
+    def fit(self, train_data, train_answers, epochs=1000, learning_rate=0.05):
         optimizer = tf.optimizers.SGD(learning_rate)
         loss = None
+        batch_size = 1
         for epoch in range(epochs):
             loss_array = []
-            for i in range(len(train_data)):
-                with tf.GradientTape() as tape:
-                    output = self.forward_train(train_data[i])
-                    _loss = self.compute_loss(output, train_answers[i])
+            for i in range(0, len(train_data), batch_size):
+                batch_data = train_data[i:i + batch_size]
+                batch_answers = train_answers[i:i + batch_size]
+                with (tf.GradientTape() as tape):
+                    output = self.fit_forward(batch_data)
+                    _loss = self.compute_loss(output, batch_answers)
                     loss_array.append(_loss.numpy())
-                gradients = tape.gradient(_loss, [self.w1, self.b1, self.w2, self.b2])
-                optimizer.apply_gradients(zip(gradients, [self.w1, self.b1, self.w2, self.b2]))
+                gradients = tape.gradient(_loss, [self.hidden_w, self.hidden_b, self.output_w, self.output_b])
+                optimizer.apply_gradients(zip(gradients, [self.hidden_w, self.hidden_b, self.output_w, self.output_b]))
             if epoch % 100 == 0:
                 loss = sum(loss_array) / len(loss_array)
                 print(f"Epoch {epoch}, Loss: {loss}")
-
         if loss < 0.01:
             self.save_model()
 
