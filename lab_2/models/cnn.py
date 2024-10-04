@@ -60,7 +60,8 @@ class CNN(Network, Trackable):
         return tf.reduce_mean(tf.square(output - y))
 
     def fit(self, train_data, train_answers, epochs=1000, learning_rate=0.05, batch_size=1):
-
+        print(f"\033[34mCNN:\033[0m\n - hidden layer count: {self._hidden_layer_count}"
+              f"\n - hidden neurons count: {self._hidden_neurons_count}\n")
         start_time = time.time()
 
         self.deviation = max(train_answers)/100
@@ -96,10 +97,11 @@ class CNN(Network, Trackable):
             loss_list.append(mean_loss.numpy())
             accuracy = accuracy_numerator / len(train_data)
             accuracy_list.append(accuracy)
-            if epoch % (epochs / 10) == 0:
-                print(f"epoch {epoch}/{epochs}, "
+            if epoch % (epochs // 10) == 0:
+                print(f"epoch {epoch:3}/{epochs}, "
                       f"loss={mean_loss:.10f}, "
                       f"accuracy={accuracy}")
+        print('\n')
         execution_time = time.time() - start_time
         if sum(accuracy_list[-3:])/3 > 0.9:
             self.save_model()

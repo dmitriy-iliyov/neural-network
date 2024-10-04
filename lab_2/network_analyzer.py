@@ -21,7 +21,7 @@ class NetworkAnalyzer:
 
     def fit_networks(self, epochs, learning_rate, batch_size):
         self.td1, self.a1 = dp.prepared_data(-1, 1, 100)
-        self.td2, self.a2 = dp.prepared_data(0, 10, 20)
+        self.td2, self.a2 = dp.prepared_data(-1, 1, 20)
         self._fit_part(self.network_list, epochs, learning_rate, batch_size)
         self._fit_part(self.network_list_2, epochs, learning_rate, batch_size)
 
@@ -49,5 +49,7 @@ class NetworkAnalyzer:
             test_result[_fit_data['network']] = count / len(self.a2)
             accuracies[_fit_data['network']] = (sum(_fit_data['accuracy'][-10:]) / 10)
         for key in test_result.keys():
-            filer.save('tests/test_results.txt', f"{key} accuracy: {accuracies[key]:.3f}; score: {test_result[key]}\n")
-            print(f"{key} accuracy: {accuracies[key]:.3f}; mse : {mses[key]:.5f}; score: {test_result[key]}")
+            filer.save('tests/test_results.txt',
+                       f"{key} accuracy - {accuracies[key]:.3f}; mse - {mses[key]:.5f}; score - {test_result[key]}")
+            print(f"{key} accuracy - {accuracies[key]:.3f}; mse - {mses[key]:.5f}; score - {test_result[key]}")
+        print('\n')
