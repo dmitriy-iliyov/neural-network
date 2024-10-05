@@ -10,12 +10,12 @@ from lab_2_fce.lab_2.models.network import Network
 
 class FNN(Network, Trackable):
 
-    def __init__(self, hidden_layer_count=1, hidden_neurons=10):
+    def __init__(self, input_neurons=2, hidden_layer_count=1, hidden_neurons=10):
         self._hidden_layer_count = hidden_layer_count
         self._hidden_neurons_count = hidden_neurons
         self._hidden_w_list = []
         self._hidden_b_list = []
-        previous_neurons_count = 2
+        previous_neurons_count = input_neurons
         for i in range(hidden_layer_count):
             self._hidden_w_list.append(
                 tf.Variable(tf.random.uniform([previous_neurons_count, hidden_neurons], -1, 1), dtype=tf.float32))
@@ -40,8 +40,11 @@ class FNN(Network, Trackable):
         output = tf.matmul(hidden_layer_output, self._output_w) + self._output_b
         return output.numpy()[0]
 
-    def _fit_forward(self, batch):
-        hidden_layer_output = batch
+    def _fit_forward(self, batch, expand=False):
+        if expand:
+            hidden_layer_output = tf.expand_dims(batch, 0)
+        else:
+            hidden_layer_output = batch
         for i in range(self._hidden_layer_count):
             hidden_layer_output = self._activation_relu(tf.matmul(hidden_layer_output, self._hidden_w_list[i])
                                                         + self._hidden_b_list[i])
@@ -104,7 +107,9 @@ class FNN(Network, Trackable):
                      'execution_time': execution_time,
                      'hidden_layer_count': self._hidden_layer_count,
                      'hidden_neurons_count': self._hidden_neurons_count}
-        filer.save_json('data_files/statistics/fnn_statistic.txt', statistic)
+        filer.save_json(
+            '/Users/sayner/github_repos/neural-network/lab_2_fce/lab_2/data_files/statistics/fnn_statistic.txt',
+            statistic)
         return statistic
 
     def _activation_relu(self, x):

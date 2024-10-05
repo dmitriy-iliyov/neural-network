@@ -1,33 +1,36 @@
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
 
-from lab_2_fce.lab_2.models.fnn import FNN
-from lab_2_fce.lab_2.tools import data_processing as dp, ploter, filer
-from lab_2_fce.lab_2_keras.models.keras_fnn import KerasFNN
+from lab_2_fce.lab_2.tools import plotter, data_processing as dp
 
 
 class NetworkComparor:
 
-    def __init__(self, input_neurons, hidden_layer_count, hidden_neurons):
-        self._custom_model = FNN(input_neurons, hidden_layer_count, hidden_neurons)
-        self._keras_model = KerasFNN(input_neurons, hidden_layer_count, hidden_neurons)
-        self._test_a2 = None
-        self._test_d2 = None
+    def __init__(self, first_model, second_model):
+        self._first_model = first_model
+        self._second_model = second_model
 
-    def fit(self, data_set, n=200, epochs=100):
-        _train_d, _train_a, self._test_d2, self._test_a2 =
-        test_size = int(n / 5)
-        # self._train_d3, self._test_a3 = dp.prepared_data(-1, 1, test_size, False)
+        self._s_fit_stat = None
+        self._f_fit_stat = None
+        self._f_test_stat = None
+        self._s_test_stat = None
 
-        cm_stat = self._custom_model.fit(_train_d, _train_a, epochs=epochs)
-        km_stat = self._keras_model.fit(_train_d, _train_a, epochs=epochs)
+    def fit(self, train_data_set, epochs=100):
+        train_data, train_answers = train_data_set
+        self._f_fit_stat = self._first_model.fit(train_data, train_answers, epochs=epochs)
+        self._s_fit_stat = self._second_model.fit(train_data, train_answers, epochs=epochs)
 
-    def predict(self):
-        prediction_k = self._keras_model.predict(self._test_d2)
-        prediction_c = [self._custom_model.predict(i) for i in self._test_d2]
-        # for ans, pc, pk in zip(self._test_a2, prediction_c, prediction_k):
-        #     print(f"z = {ans}; pcm = {pc[0]}; pkm = {pk[0]}")
-        custom_model_mse = np.mean((self._test_a2 - prediction_c)**2)
-        keras_model_mse = np.mean((self._test_a2 - prediction_k)**2)
-        return f"fnn custom model mse = {custom_model_mse};\n fnn keras model mse = {keras_model_mse}"
+    def predict(self, first_test_data_set):
+        test_data_1, test_answers_1 = first_test_data_set
+        prediction_f = self._first_model.predict(test_data_1)
+        prediction_s = self._second_model.predict(test_data_1)
+
+        self._f_test_stat = dp.prepared_data_to_plotting(prediction_f, test_answers_1)
+        self._s_test_stat = dp.prepared_data_to_plotting(prediction_s, test_answers_1)
+
+    def print_plots(self):
+        current_plotter = plotter.Plotter(14, 10, 2, 2, [1, 1], [1, 1])
+        current_plotter.add_mse_plots(self._f_fit_stat, 0, 0)
+        current_plotter.add_test_plots(self._f_test_stat, 0, 1)
+        current_plotter.add_mse_plots(self._s_fit_stat, 1, 0)
+        current_plotter.add_test_plots(self._s_test_stat, 1, 1)
+        current_plotter.show()

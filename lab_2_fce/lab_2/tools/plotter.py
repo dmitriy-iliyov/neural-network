@@ -35,16 +35,15 @@ def one_fit_statistic(fit_data, test_data):
     # fig = plt.figure(figsize=(12, 5))
     gs = fig.add_gridspec(2, 2, width_ratios=[1, 1], height_ratios=[1, 1], wspace=0.2, hspace=0.2)
     plt.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95, wspace=0.2)
-
     ax1 = fig.add_subplot(gs[0, 0])
     one_plot(ax1, range(fit_data['epochs']), fit_data['accuracy'], 1, 'Accuracy', 'blue', 'Model Accuracy',
              'Epochs', 'Accuracy')
     hidden_layer_count = fit_data.get('hidden_layer_count', 1)
     test_1_info = (f'Network: {fit_data["network"]}\n'
-                f'Hidden layer count: {hidden_layer_count}\n'
-                f'Hidden Neurons: {fit_data["hidden_neurons_count"]}\n'
-                f'Execution Time: {fit_data["execution_time"]:.2f}s\n'
-                f'Batch Size: {fit_data["batch_size"]}')
+                   f'Hidden layer count: {hidden_layer_count}\n'
+                   f'Hidden Neurons: {fit_data["hidden_neurons_count"]}\n'
+                   f'Execution Time: {fit_data["execution_time"]:.2f}s\n'
+                   f'Batch Size: {fit_data["batch_size"]}')
     ax1.text(0.975, 0.05, test_1_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
              transform=ax1.transAxes, bbox=dict(facecolor='white', alpha=0.5))
 
@@ -119,3 +118,70 @@ def draw_fig(x, y, z):
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
     plt.show()
+
+
+class Plotter:
+
+    def __init__(self, x, y, nrows, ncols, w, h):
+        self.fig = plt.figure(figsize=(x, y))
+        self.gs = self.fig.add_gridspec(nrows, ncols, width_ratios=w, height_ratios=h, wspace=0.2, hspace=0.2)
+        plt.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95, wspace=0.2)
+
+    def add_one_plot(self, gx, gy, x, y, y_max, label, color, title, x_label, y_label):
+        ax = self.fig.add_subplot(self.gs[gx, gy])
+        one_plot(ax, x, y, y_max, label, color, title, x_label, y_label)
+
+    def add_two_plots(self, gx, gy, x1, y1, label1, color1, x2, y2, label2, color2, title, x_label, y_label):
+        ax = self.fig.add_subplot(self.gs[gx, gy])
+        two_plot(ax, x1, y1, label1, color1, x2, y2, label2, color2, title, x_label, y_label)
+
+    def add_fit_plots(self, fit_data, gx_1, gy_1, gx_2, gy_2):
+        ax1 = self.fig.add_subplot(self.gs[gx_1, gy_1])
+        one_plot(ax1, range(fit_data['epochs']), fit_data['accuracy'], 1, 'Accuracy', 'blue', 'Model Accuracy',
+                 'Epochs', 'Accuracy')
+        hidden_layer_count = fit_data.get('hidden_layer_count', 1)
+        test_1_info = (f'Network: {fit_data["network"]}\n'
+                       f'Hidden layer count: {hidden_layer_count}\n'
+                       f'Hidden Neurons: {fit_data["hidden_neurons_count"]}\n'
+                       f'Execution Time: {fit_data["execution_time"]:.2f}s\n'
+                       f'Batch Size: {fit_data["batch_size"]}')
+        ax1.text(0.975, 0.05, test_1_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+                 transform=ax1.transAxes, bbox=dict(facecolor='white', alpha=0.5))
+
+        ax2 = self.fig.add_subplot(self.gs[gx_2, gy_2])
+        one_plot(ax2, range(fit_data['epochs']), fit_data['mse'], max(fit_data['mse']), 'MSE', 'red', 'Model MSE',
+                 'Epochs', 'MSE')
+        mse_info = f"MSE: {fit_data['mse'][-1]:.4f}"
+        ax2.text(0.975, 0.05, mse_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+                 transform=ax2.transAxes, bbox=dict(facecolor='white', alpha=0.5))
+
+    def add_mse_plots(self, fit_data, gx, gy):
+        ax = self.fig.add_subplot(self.gs[gx, gy])
+        one_plot(ax, range(fit_data['epochs']), fit_data['mse'], max(fit_data['mse']), 'MSE', 'red', 'Model MSE',
+                 'Epochs', 'MSE')
+        mse_info = f"MSE: {fit_data['mse'][-1]:.4f}"
+        hidden_layer_count = fit_data.get('hidden_layer_count', 1)
+        test_1_info = (f'Network: {fit_data["network"]}\n'
+                       f'Hidden layer count: {hidden_layer_count}\n'
+                       f'Hidden Neurons: {fit_data["hidden_neurons_count"]}\n'
+                       f'Execution Time: {fit_data["execution_time"]:.2f}s\n'
+                       f'Batch Size: {fit_data["batch_size"]}\n'
+                       f'MSE: {fit_data['mse'][-1]:.4f}')
+        ax.text(0.975, 0.05, test_1_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+                 transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.5))
+
+    def add_test_plots(self, test_data, gx, gy):
+        ax3 = self.fig.add_subplot(self.gs[gx, gy])
+        sorted_test_predicts_1 = sorted(test_data['test_predicts_1'], reverse=True)
+        sorted_answers_1 = sorted(test_data['test_answers_1'], reverse=True)
+        e_count_1 = [i for i in range(len(test_data['test_answers_1']))]
+        two_plot(ax3, e_count_1, sorted_test_predicts_1, 'Predicts', 'red',
+                 e_count_1, sorted_answers_1, 'Answers', 'green',
+                 'Test on fit range', 'Examples Count', 'Answers')
+        test_1_info = (f'MSE: {test_data['mse_1']:.4f}\n'
+                       f'Test Accuracy: {test_data['score_1']}')
+        ax3.text(0.975, 0.05, test_1_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+                 transform=ax3.transAxes, bbox=dict(facecolor='white', alpha=0.5))
+
+    def show(self):
+        plt.show()

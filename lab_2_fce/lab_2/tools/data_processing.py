@@ -8,6 +8,21 @@ def function(x, y):
     return np.sqrt(np.power(x, 2) + np.power(y, 2))
 
 
+def x_2(x):
+    return pow(x, 2)
+
+
+def prepared_data_one_parm_func(min_=-1, max_=1, n=100, split=True, func=x_2):
+    x = np.random.uniform(min_, max_, n)
+    y = func(x)
+    indices = np.random.permutation(n)
+    x, y = x[indices].astype(np.float32), y[indices].astype(np.float32)
+    if split:
+        b = int(n/5)
+        return x[:-b], y[:-b], x[-b:], y[-b:]
+    return x, y
+
+
 def prepared_data(min_=-1, max_=1, n=100, split=True, func=function):
     x = np.random.uniform(min_, max_, n)
     y = np.random.uniform(min_, max_, n)
@@ -30,6 +45,20 @@ def processed_data():
             if statistics['batch_size'] == 1 and statistics['epochs'] == 100:
                 output_data[network[0:3]]['batch'].append(statistics[''])
                 output_data[network[0:3]]['batch'].append(statistics[''])
+
+
+def prepared_data_to_plotting(pred_1, a_1):
+    model_pred_stat = {}
+    count = 0
+    deviation_2 = max(a_1) / 100
+    model_pred_stat['test_predicts_1'] = pred_1
+    model_pred_stat['test_answers_1'] = a_1.tolist()
+    for i, p in enumerate(pred_1):
+        if abs(p - a_1[i]) < deviation_2:
+            count += 1
+    model_pred_stat['mse_1'] = float(np.mean((a_1 - pred_1) ** 2))
+    model_pred_stat['score_1'] = count / len(a_1)
+    return model_pred_stat
 
 
 def foo(_type, epochs, sample_len):
@@ -124,3 +153,4 @@ def foo_part(key, statistics, output_data):
 
     output_data[key]['test_answers_2'] += statistics['test_answers_2']
     output_data[key]['test_answers_2_count'] += 1
+

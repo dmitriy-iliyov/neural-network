@@ -10,14 +10,14 @@ from lab_2_fce.lab_2.models.network import Network
 
 class ENN(Network, Trackable):
 
-    def __init__(self, hidden_layer_count=1, hidden_neurons=15):
+    def __init__(self, input_neurons=2, hidden_layer_count=1, hidden_neurons=15):
         self._hidden_layer_count = hidden_layer_count
         self._hidden_neurons_count = hidden_neurons
         self._hidden_w_list = []
         self._hidden_b_list = []
         self._context_hidden_output_list = []
         self._context_hidden_w_list = []
-        previous_neurons_count = 2
+        previous_neurons_count = input_neurons
         for i in range(hidden_layer_count):
             self._hidden_w_list.append(
                 tf.Variable(tf.random.uniform([previous_neurons_count, hidden_neurons], -1, 1), dtype=tf.float32))
@@ -132,7 +132,9 @@ class ENN(Network, Trackable):
                      'hidden_layer_count': self._hidden_layer_count,
                      'hidden_neurons_count': self._hidden_neurons_count}
 
-        filer.save_json('data_files/statistics/enn_statistic.txt', statistic)
+        filer.save_json(
+            '/Users/sayner/github_repos/neural-network/lab_2_fce/lab_2/data_files/statistics/enn_statistic.txt',
+            statistic)
         return statistic
 
     def _activation_relu(self, x):
