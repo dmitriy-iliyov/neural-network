@@ -1,7 +1,22 @@
 import numpy as np
 
-from lab_2_fce.lab_2.tools import data_processing as dp, ploter, filer
+from lab_2_fce.lab_2.tools import data_processing as dp, plotter, filer
 from models import fnn, cnn, enn
+
+
+def print_resulting_plots(epochs, test_len):
+    t1, t1_tests_count = dp.foo(1, epochs, test_len)
+    t2, t2_tests_count = dp.foo(2, epochs, test_len)
+    print(t1_tests_count)
+    print(t2_tests_count)
+    for network in t1.keys():
+        for sample in t1[network]:
+            t1[network][sample] = sorted(t1[network][sample], reverse=True)
+            t2[network][sample] = sorted(t2[network][sample], reverse=True)
+    for network in t1.keys():
+        plotter.results_plots(network,
+                             t1[network]['tp1'], t1[network]['ta1'], t1[network]['tp2'], t1[network]['ta2'],
+                             t2[network]['tp1'], t2[network]['ta1'], t2[network]['tp2'], t2[network]['ta2'])
 
 
 class NetworkAnalyzer:
@@ -17,14 +32,14 @@ class NetworkAnalyzer:
         self._network_list_2 = None
 
     def fit_networks(self, epochs, learning_rate, batch_size, n):
-        self._network_list = [fnn.FNN(1, 10),
-                              cnn.CNN(1, 20),
-                              enn.ENN(1, 15)]
-        self._network_list_2 = [fnn.FNN(1, 20),
-                                cnn.CNN(2, 10),
-                                enn.ENN(3, 5)]
+        self._network_list = [fnn.FNN(2, 1, 10),
+                              cnn.CNN(2, 1, 20),
+                              enn.ENN(2, 1, 15)]
+        self._network_list_2 = [fnn.FNN(2, 1, 20),
+                                cnn.CNN(2, 2, 10),
+                                enn.ENN(2,3, 5)]
 
-        self._train_d, self._train_a, self._td2, self._a2 = dp.prepared_data(0, 10, n)
+        self._train_d, self._train_a, self._td2, self._a2 = dp.prepared_data(-1, 1, n)
         test_size = int(n/5)
         self._td3, self._a3 = dp.prepared_data(-1, 1, test_size, False)
 
@@ -67,18 +82,4 @@ class NetworkAnalyzer:
             _test_data['hidden_neurons_count'] = _fit_data['hidden_neurons_count']
             filer.save_json(f"data_files/test_data/{_fit_data['network'].lower()}_test_data.txt",
                             _test_data)
-            ploter.one_fit_statistic(_fit_data, _test_data)
-
-    def print_resulting_plots(self, epochs, test_len):
-        t1, t1_tests_count = dp.foo(1, epochs, test_len)
-        t2, t2_tests_count = dp.foo(2, epochs, test_len)
-        print(t1_tests_count)
-        print(t2_tests_count)
-        for network in t1.keys():
-            for sample in t1[network]:
-                t1[network][sample] = sorted(t1[network][sample], reverse=True)
-                t2[network][sample] = sorted(t2[network][sample], reverse=True)
-        for network in t1.keys():
-            ploter.results_plots(network,
-                                 t1[network]['tp1'], t1[network]['ta1'], t1[network]['tp2'], t1[network]['ta2'],
-                                 t2[network]['tp1'], t2[network]['ta1'], t2[network]['tp2'], t2[network]['ta2'])
+            plotter.one_fit_statistic(_fit_data, _test_data)
