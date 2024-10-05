@@ -79,7 +79,8 @@ def one_fit_statistic(fit_data, test_data):
     plt.show()
 
 
-def results_plots(tdfr_t1, afr_t1, tdnr_t1, anr_t1, tdfr_t2, afr_t2, tdnr_t2, anr_t2):
+def results_plots(network_name, tdfr_t1, afr_t1, tdnr_t1, anr_t1, tdfr_t2, afr_t2, tdnr_t2, anr_t2):
+    network_name = network_name.upper()
     fig = plt.figure(figsize=(14, 10))
     # fig = plt.figure(figsize=(12, 5))
     gs = fig.add_gridspec(2, 2, width_ratios=[1, 1], height_ratios=[1, 1], wspace=0.2, hspace=0.2)
@@ -88,22 +89,22 @@ def results_plots(tdfr_t1, afr_t1, tdnr_t1, anr_t1, tdfr_t2, afr_t2, tdnr_t2, an
     e_count_1 = [i for i in range(len(tdfr_t1))]
     two_plot(ax1, e_count_1, tdfr_t1, 'Predicts', 'red',
              e_count_1, afr_t1, 'Answers', 'green',
-             'Test type 1 on fit range', 'Examples Count', 'Answers')
+             f"Test {network_name} type 1 on fit range", 'Examples Count', 'Answers')
     ax2 = fig.add_subplot(gs[0, 1])
     e_count_2 = [i for i in range(len(tdnr_t1))]
     two_plot(ax2, e_count_2, tdnr_t1, 'Predicts', 'red',
              e_count_2, anr_t1, 'Answers', 'green',
-             'Test type 1 on new range', 'Examples Count', 'Answers')
+             f"Test {network_name} type 1 on new range", 'Examples Count', 'Answers')
     ax3 = fig.add_subplot(gs[1, 0])
     e_count_3 = [i for i in range(len(tdfr_t2))]
     two_plot(ax3, e_count_3, tdfr_t2, 'Predicts', 'red',
              e_count_3, afr_t2, 'Answers', 'green',
-             'Test type 2 on fit range', 'Examples Count', 'Answers')
+             f"Test {network_name} type 2 on fit range", 'Examples Count', 'Answers')
     ax4 = fig.add_subplot(gs[1, 1])
     e_count_4 = [i for i in range(len(tdnr_t2))]
     two_plot(ax4, e_count_4, tdnr_t2, 'Predicts', 'red',
              e_count_4, anr_t2, 'Answers', 'green',
-             'Test type 2 on new range', 'Examples Count', 'Answers')
+             f"Test {network_name} type 2 on new range", 'Examples Count', 'Answers')
     plt.show()
 
 

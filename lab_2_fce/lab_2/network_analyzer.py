@@ -76,5 +76,5 @@ class NetworkAnalyzer:
                 t1[network][sample] = sorted(t1[network][sample], reverse=True)
                 t2[network][sample] = sorted(t2[network][sample], reverse=True)
         for network in t1.keys():
-            ploter.results_plots(t1[network]['tp1'], t1[network]['ta1'], t1[network]['tp2'], t1[network]['ta2'],
+            ploter.results_plots(network, t1[network]['tp1'], t1[network]['ta1'], t1[network]['tp2'], t1[network]['ta2'],
                                  t2[network]['tp1'], t2[network]['ta1'], t2[network]['tp2'], t2[network]['ta2'])

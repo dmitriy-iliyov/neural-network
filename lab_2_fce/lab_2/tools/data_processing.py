@@ -48,7 +48,7 @@ def foo(_type=1):
     for file_name, statistics_list in data.items():
         for statistics in statistics_list:
             key = file_name[:3]
-            if statistics['epochs'] < 10:
+            if statistics['epochs'] < 100:
                 continue
 
             if _type == 1:
