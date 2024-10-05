@@ -23,10 +23,11 @@ class NetworkAnalyzer:
         self._network_list_2 = [fnn.FNN(1, 20),
                                 cnn.CNN(2, 10),
                                 enn.ENN(3, 5)]
-        self._train_d, self._train_a = dp.prepared_data(-1, 1, n)
-        teat_size = int(n/5)
-        self._td2, self._a2 = dp.prepared_data(-1, 1, teat_size)
-        self._td3, self._a3 = dp.prepared_data(0, 10, teat_size)
+
+        self._train_d, self._train_a, self._td2, self._a2 = dp.prepared_data(0, 10, n)
+        test_size = int(n/5)
+        self._td3, self._a3 = dp.prepared_data(-1, 1, test_size, False)
+
         self._fit_part(self._network_list, epochs, learning_rate, batch_size)
         self._fit_part(self._network_list_2, epochs, learning_rate, batch_size)
 
@@ -68,13 +69,16 @@ class NetworkAnalyzer:
                             _test_data)
             ploter.one_fit_statistic(_fit_data, _test_data)
 
-    def print_resulting_plots(self):
-        t1 = dp.foo()
-        t2 = dp.foo(2)
+    def print_resulting_plots(self, epochs, test_len):
+        t1, t1_tests_count = dp.foo(1, epochs, test_len)
+        t2, t2_tests_count = dp.foo(2, epochs, test_len)
+        print(t1_tests_count)
+        print(t2_tests_count)
         for network in t1.keys():
             for sample in t1[network]:
                 t1[network][sample] = sorted(t1[network][sample], reverse=True)
                 t2[network][sample] = sorted(t2[network][sample], reverse=True)
         for network in t1.keys():
-            ploter.results_plots(network, t1[network]['tp1'], t1[network]['ta1'], t1[network]['tp2'], t1[network]['ta2'],
+            ploter.results_plots(network,
+                                 t1[network]['tp1'], t1[network]['ta1'], t1[network]['tp2'], t1[network]['ta2'],
                                  t2[network]['tp1'], t2[network]['ta1'], t2[network]['tp2'], t2[network]['ta2'])

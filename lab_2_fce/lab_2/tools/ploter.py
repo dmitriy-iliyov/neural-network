@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import mplcursors
 
 
-def one_plot(ax, x, y, y_lim, label, color, title, x_label, y_label):
+def one_plot(ax, x, y, y_max, label, color, title, x_label, y_label):
     ax.plot(x, y, label=label, color=color)
     ax.set_title(title)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
-    ax.set_ylim(0, y_lim + y_lim/10)
+    ax.set_ylim(0, y_max + y_max / 10)
     ax.legend()
     ax.grid(True)
 
@@ -15,12 +15,15 @@ def one_plot(ax, x, y, y_lim, label, color, title, x_label, y_label):
 
 
 def two_plot(ax, x1, y1, label1, color1, x2, y2, label2, color2, title, x_label, y_label):
-    ax.plot(x1, y1, label=label1, color=color1, marker='o', markersize=4)
-    ax.plot(x2, y2, label=label2, color=color2, marker='o', markersize=4)
+    ax.plot(x1, y1, label=label1, color=color1, marker='o', markersize=2)
+    ax.plot(x2, y2, label=label2, color=color2, marker='o', markersize=2)
     ax.set_title(title)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
-    ax.set_ylim(0, max(y1 + y2) + 0.02)
+    y = y1 + y2
+    min_y = min(y)
+    max_y = max(y)
+    ax.set_ylim(min_y - min_y / 10, max_y + max_y / 10)
     ax.legend()
     ax.grid(True)
 
@@ -60,7 +63,7 @@ def one_fit_statistic(fit_data, test_data):
              e_count_1, sorted_answers_1, 'Answers', 'green',
              'Test on fit range', 'Examples Count', 'Answers')
     test_1_info = (f'MSE: {test_data['mse_1']:.4f}\n'
-                   f'Test Score: {test_data['score_1']}')
+                   f'Test Accuracy: {test_data['score_1']}')
     ax3.text(0.975, 0.05, test_1_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
              transform=ax3.transAxes, bbox=dict(facecolor='white', alpha=0.5))
 
@@ -72,7 +75,7 @@ def one_fit_statistic(fit_data, test_data):
              e_count_2, sorted_answers_2, 'Answers', 'green',
              'Test on new range', 'Examples Count', 'Answers')
     test_2_info = (f'MSE: {test_data['mse_2']:.4f}\n'
-                   f'Test Score: {test_data['score_2']}')
+                   f'Test Accuracy: {test_data['score_2']}')
     ax4.text(0.975, 0.05, test_2_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
              transform=ax4.transAxes, bbox=dict(facecolor='white', alpha=0.5))
 

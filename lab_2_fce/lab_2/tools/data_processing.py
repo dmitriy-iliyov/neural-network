@@ -8,7 +8,7 @@ def function(x, y):
     return np.sqrt(np.power(x, 2) + np.power(y, 2))
 
 
-def prepared_data(min_=-1, max_=1, n=100, func=function):
+def prepared_data(min_=-1, max_=1, n=100, split=True, func=function):
     x = np.random.uniform(min_, max_, n)
     y = np.random.uniform(min_, max_, n)
     z = func(x, y)
@@ -16,7 +16,9 @@ def prepared_data(min_=-1, max_=1, n=100, func=function):
     indices = np.random.permutation(n)
     x, y, z = x[indices], y[indices], z[indices]
     xy = np.array([[x[i], y[i]] for i in range(n)], dtype=np.float32)
-
+    if split:
+        b = int(n/5)
+        return xy[:-b], z.astype(np.float32)[:-b], xy[-b:], z.astype(np.float32)[-b:]
     return xy, z.astype(np.float32)
 
 
@@ -30,7 +32,7 @@ def processed_data():
                 output_data[network[0:3]]['batch'].append(statistics[''])
 
 
-def foo(_type=1):
+def foo(_type, epochs, sample_len):
     data = filer.read_from_dir('data_files/test_data')
     output_data = defaultdict(lambda: {
         'test_predicts_1': np.zeros(0),
@@ -48,13 +50,14 @@ def foo(_type=1):
     for file_name, statistics_list in data.items():
         for statistics in statistics_list:
             key = file_name[:3]
-            if statistics['epochs'] < 100:
+            print(statistics['epochs'], len(statistics['test_predicts_1']))
+            if statistics['epochs'] == epochs and len(statistics['test_predicts_1']) == sample_len:
+                if _type == 1:
+                    process_statistics_type_1(key, statistics, output_data)
+                elif _type == 2:
+                    process_statistics_type_2(key, statistics, output_data)
+            else:
                 continue
-
-            if _type == 1:
-                process_statistics_type_1(key, statistics, output_data)
-            elif _type == 2:
-                process_statistics_type_2(key, statistics, output_data)
 
     normalize_output_data(output_data)
     pre_result = {
@@ -74,7 +77,7 @@ def foo(_type=1):
             'ta2': pre_result['ta2'][network],
         }
 
-    return result
+    return result, [output_data[n]['test_predicts_1_count'] for n in output_data.keys()]
 
 
 def process_statistics_type_1(key, statistics, output_data):

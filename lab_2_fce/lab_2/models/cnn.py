@@ -30,7 +30,7 @@ class CNN(Network, Trackable):
             model=self,
             optimizer=tf.optimizers.Adam()
         )
-        self.checkpoint_dir = "checkpoints/cnn_model"
+        self.checkpoint_dir = "checkpoints/cnn_model/"
         self.checkpoint_manager = tf.train.CheckpointManager(self.checkpoint, self.checkpoint_dir, max_to_keep=3)
 
     def predict(self, x_y):
@@ -101,7 +101,7 @@ class CNN(Network, Trackable):
                 print(f"epoch {epoch:3}/{epochs}, "
                       f"mse={mean_mse:.10f}, "
                       f"accuracy={epoch_accuracy}")
-        print('\n')
+        print()
         execution_time = time.time() - start_time
         if sum(accuracy_list[-3:])/3 > 0.9:
             self.save_model()
@@ -119,10 +119,10 @@ class CNN(Network, Trackable):
     def _activation_relu(self, x):
         return tf.maximum(0.0, x)
 
-    def save_model(self, checkpoint_dir="checkpoints/cnn_model"):
-        save_path = self.checkpoint.save(file_prefix=checkpoint_dir + 'cnn_model')
-        print(f"\033[35msaved to: {save_path}\033[0m")
+    def save_model(self):
+        save_path = self.checkpoint.save(file_prefix=self.checkpoint_dir + 'cnn_model')
+        print(f"\033[35msaved to: {save_path}\033[0m\n")
 
-    def load_model(self, checkpoint_dir="checkpoints/cnn_model"):
-        self.checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
-        print("\033[35mrestored!\033[0m")
+    def load_model(self):
+        self.checkpoint.restore(tf.train.latest_checkpoint(self.checkpoint_dir))
+        print("\033[35mrestored!\033[0m\n")
