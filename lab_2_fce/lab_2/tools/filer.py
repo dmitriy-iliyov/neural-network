@@ -1,12 +1,14 @@
 import json
 import os
+from collections.abc import Iterable
 
 
-def save_json(file_name, statistic):
-    statistic['accuracy'] = [float(i) for i in statistic['accuracy']]
-    statistic['loss'] = [float(i) for i in statistic['loss']]
-    with open("data_files/" + file_name, 'a') as file:
-        file.write(json.dumps(statistic) + '\n')
+def save_json(file_path, data):
+    for key in data.keys():
+        if isinstance(data[key], Iterable) and not isinstance(data[key], str):
+            data[key] = [float(i) for i in data[key]]
+    with open(file_path, 'a') as file:
+        file.write(json.dumps(data) + '\n')
 
 
 def save(file_path, data):
@@ -20,7 +22,7 @@ def read(file_name):
     return data
 
 
-def read_from_dir(directory="data_files/"):
+def read_from_dir(directory="data_files/statistics/"):
     data = {}
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)

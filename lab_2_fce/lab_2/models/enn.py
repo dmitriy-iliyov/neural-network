@@ -4,8 +4,8 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.python.trackable.base import Trackable
 
-from tools import filer
-from models.network import Network
+from lab_2_fce.lab_2.tools import filer
+from lab_2_fce.lab_2.models.network import Network
 
 
 class ENN(Network, Trackable):
@@ -65,7 +65,7 @@ class ENN(Network, Trackable):
         output = tf.matmul(hidden_layer_output, self._output_w) + self._output_b
         return output
 
-    def _compute_loss(self, output, y):
+    def _compute_mse(self, output, y):
         return tf.reduce_mean(tf.square(output - y))
 
     def fit(self, train_data, train_answers, epochs=1000, learning_rate=0.05, batch_size=1):
@@ -75,12 +75,12 @@ class ENN(Network, Trackable):
 
         self.deviation = max(train_answers)/100
         optimizer = tf.optimizers.SGD(learning_rate)
-        loss_list = []
+        mse_list = []
         accuracy_list = []
 
         for epoch in range(1, epochs + 1):
-            epoch_loss = []
-            accuracy_numerator = 0
+            epoch_mse = []
+            epoch_accuracy_numerator = 0
 
             indexes = np.random.permutation(len(train_data))
             train_data = train_data[indexes]
@@ -98,42 +98,41 @@ class ENN(Network, Trackable):
                         current_input = batch_data[:, t, :]
                         output = self._fit_forward(current_input)
                         outputs.append(output)
-                    # for i in range(len(batch_answers)):
-                    #     print(f"{outputs[-1][i]} : {batch_answers[i]}")
-                    loss = self._compute_loss(outputs[-1], batch_answers)
-                    epoch_loss.append(loss)
+                    # self._debug(outputs[-1], batch_answers)
+                    mse = self._compute_mse(outputs[-1], batch_answers)
+                    epoch_mse.append(mse)
 
                 for _ in range(len(batch_answers)):
                     correct_predictions = np.abs(output.numpy()[_] - batch_answers[_]) < self.deviation
-                    accuracy_numerator += np.sum(correct_predictions)
+                    epoch_accuracy_numerator += np.sum(correct_predictions)
 
-                gradients = tape.gradient(loss,
+                gradients = tape.gradient(mse,
                                           [*self._hidden_w_list, *self._hidden_b_list, self._output_w, self._output_b])
                 optimizer.apply_gradients(
                     zip(gradients, [*self._hidden_w_list, *self._hidden_b_list, self._output_w, self._output_b]))
 
-            mean_loss = tf.reduce_mean([l.numpy() for l in epoch_loss])
-            loss_list.append(mean_loss.numpy())
-            accuracy = accuracy_numerator / len(train_data)
-            accuracy_list.append(accuracy)
+            mean_mse = tf.reduce_mean([mse.numpy() for mse in epoch_mse])
+            mse_list.append(mean_mse.numpy())
+            epoch_accuracy = epoch_accuracy_numerator / len(train_data)
+            accuracy_list.append(epoch_accuracy)
             if epoch % (epochs // 10) == 0:
                 print(f"epoch {epoch:3}/{epochs}, "
-                      f"loss={mean_loss:.10f}, "
-                      f"accuracy={accuracy}")
+                      f"mse={mean_mse:.10f}, "
+                      f"accuracy={epoch_accuracy}")
         print('\n')
         execution_time = time.time() - start_time
         if sum(accuracy_list[-3:])/3 > 0.9:
             self.save_model()
         statistic = {'network': 'ENN',
                      'accuracy': accuracy_list,
-                     'loss': loss_list,
+                     'mse': mse_list,
                      'epochs': epochs,
                      'batch_size': batch_size,
                      'execution_time': execution_time,
                      'hidden_layer_count': self._hidden_layer_count,
                      'hidden_neurons_count': self._hidden_neurons_count}
 
-        filer.save_json('enn_statistic.txt', statistic)
+        filer.save_json('data_files/statistics/enn_statistic.txt', statistic)
         return statistic
 
     def _activation_relu(self, x):
@@ -141,8 +140,12 @@ class ENN(Network, Trackable):
 
     def save_model(self, checkpoint_dir="checkpoints/enn_model"):
         save_path = self.checkpoint.save(file_prefix=checkpoint_dir + 'enn_model')
-        print(f"saved to: {save_path}")
+        print(f"\033[35msaved to: {save_path}\033[0m")
 
     def load_model(self, checkpoint_dir="checkpoints/enn_model"):
         self.checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
-        print("restored!")
+        print("\033[35mrestored!\033[0m")
+
+    def _debug(self, output, batch_answers):
+        for i in range(len(batch_answers)):
+            print(f"{output[i]} : {batch_answers[i]}")

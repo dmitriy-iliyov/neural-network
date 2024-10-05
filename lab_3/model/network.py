@@ -4,13 +4,10 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.python.trackable.base import Trackable
 
-from tools import filer
-from models.network import Network
 
+class MLP(Trackable):
 
-class FNN(Network, Trackable):
-
-    def __init__(self, hidden_layer_count=1, hidden_neurons=10):
+    def __init__(self, input_neurons=1,   hidden_layer_count=1, hidden_neurons=10):
         self._hidden_layer_count = hidden_layer_count
         self._hidden_neurons_count = hidden_neurons
         self._hidden_w_list = []
@@ -25,12 +22,12 @@ class FNN(Network, Trackable):
         self._output_b = tf.Variable(tf.zeros([1]), dtype=tf.float32)
         self.deviation = None
 
-        self.checkpoint = tf.train.Checkpoint(
-            model=self,
-            optimizer=tf.optimizers.Adam()
-        )
-        self.checkpoint_dir = "checkpoints/fnn_model"
-        self.checkpoint_manager = tf.train.CheckpointManager(self.checkpoint, self.checkpoint_dir, max_to_keep=3)
+        # self.checkpoint = tf.train.Checkpoint(
+        #     model=self,
+        #     optimizer=tf.optimizers.Adam()
+        # )
+        # self.checkpoint_dir = "checkpoints/"
+        # self.checkpoint_manager = tf.train.CheckpointManager(self.checkpoint, self.checkpoint_dir, max_to_keep=3)
 
     def predict(self, x_y):
         hidden_layer_output = tf.expand_dims(x_y, 0)
@@ -52,7 +49,7 @@ class FNN(Network, Trackable):
         return tf.reduce_mean(tf.square(output - y))
 
     def fit(self, train_data, train_answers, epochs=1000, learning_rate=0.05, batch_size=1):
-        print(f"\033[34mFNN:\033[0m\n - hidden layer count: {self._hidden_layer_count}"
+        print(f"\033[34mMLP:\033[0m\n - hidden layer count: {self._hidden_layer_count}"
               f"\n - hidden neurons count: {self._hidden_neurons_count}\n")
         start_time = time.time()
 
@@ -94,26 +91,16 @@ class FNN(Network, Trackable):
                       f"accuracy={accuracy}")
         print('\n')
         execution_time = time.time() - start_time
-        if sum(accuracy_list[-3:])/3 > 0.9:
-            self.save_model()
-        statistic = {'network': 'FNN',
-                     'accuracy': accuracy_list,
-                     'loss': loss_list,
-                     'epochs': epochs,
-                     'batch_size': batch_size,
-                     'execution_time': execution_time,
-                     'hidden_layer_count': self._hidden_layer_count,
-                     'hidden_neurons_count': self._hidden_neurons_count}
-        filer.save_json('fnn_statistic.txt', statistic)
-        return statistic
+        # if sum(accuracy_list[-3:])/3 > 0.9:
+        #     self.save_model()
 
     def _activation_relu(self, x):
         return tf.maximum(0.0, x)
 
-    def save_model(self):
-        save_path = self.checkpoint.save(file_prefix=self.checkpoint_dir + 'fnn_model')
-        print(f"saved to: {save_path}")
-
-    def load_model(self):
-        self.checkpoint.restore(tf.train.latest_checkpoint(self.checkpoint_dir))
-        print("restored!")
+    # def save_model(self):
+    #     save_path = self.checkpoint.save(file_prefix=self.checkpoint_dir + 'fnn_model')
+    #     print(f"saved to: {save_path}")
+    #
+    # def load_model(self):
+    #     self.checkpoint.restore(tf.train.latest_checkpoint(self.checkpoint_dir))
+    #     print("restored!")
