@@ -110,13 +110,28 @@ def results_plots(network_name, tdfr_t1, afr_t1, tdnr_t1, anr_t1, tdfr_t2, afr_t
     plt.show()
 
 
-def draw_fig(x, y, z):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot_surface(x, y, z, cmap='viridis')
-    ax.set_xlabel('X axis')
-    ax.set_ylabel('Y axis')
-    ax.set_zlabel('Z axis')
+def print_plot_lab_3(data):
+    fig = plt.figure(figsize=(12, 5))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1, 1], height_ratios=[1], wspace=0.2, hspace=0.2)
+    plt.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95, wspace=0.2)
+    ax1 = fig.add_subplot(gs[0, 0])
+    one_plot(ax1, range(data['epochs']), data['accuracy'], 1, 'Accuracy', 'blue', 'Model Accuracy',
+             'Epochs', 'Accuracy')
+    test_1_info = (f'Network: FNN\n'
+                   f'Hidden layer count: 1\n'
+                   f'Hidden Neurons: 128\n'
+                   f'Execution Time: {data["execution_time"]:.2f}s\n'
+                   f'Batch Size: {data["batch_size"]}')
+    ax1.text(0.975, 0.05, test_1_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+             transform=ax1.transAxes, bbox=dict(facecolor='white', alpha=0.5))
+
+    ax2 = fig.add_subplot(gs[0, 1])
+    one_plot(ax2, range(data['epochs']), data['cce'], max(data['cce']),
+             'CCE', 'red', 'Categorical Cross Entropy',
+             'Epochs', 'Categorical Cross Entropy')
+    cce_info = f"CCE: {data['cce'][-1]:.4f}"
+    ax2.text(0.975, 0.05, cce_info, fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+             transform=ax2.transAxes, bbox=dict(facecolor='white', alpha=0.5))
     plt.show()
 
 

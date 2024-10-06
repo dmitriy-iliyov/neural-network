@@ -37,16 +37,6 @@ def prepared_data(min_=-1, max_=1, n=100, split=True, func=function):
     return xy, z.astype(np.float32)
 
 
-def processed_data():
-    data = filer.read_from_dir()
-    output_data = {}
-    for network in data.keys():
-        for statistics in data[network]:
-            if statistics['batch_size'] == 1 and statistics['epochs'] == 100:
-                output_data[network[0:3]]['batch'].append(statistics[''])
-                output_data[network[0:3]]['batch'].append(statistics[''])
-
-
 def prepared_data_to_plotting(pred_1, a_1):
     model_pred_stat = {}
     count = 0
