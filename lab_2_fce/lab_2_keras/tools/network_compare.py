@@ -1,5 +1,3 @@
-import numpy as np
-
 from lab_2_fce.lab_2.tools import plotter, data_processing as dp
 
 
